@@ -8,12 +8,12 @@ category: compositors
 
 Stagger the execution of a series of actions.
 
+<TOC />
+
 ## Import 
 
 ```javascript
 import { stagger } from 'popmotion';
-// or stand-alone:
-import stagger from 'popmotion/compositors/stagger';
 ```
 
 ## Usage

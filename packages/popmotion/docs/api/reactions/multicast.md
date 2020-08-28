@@ -10,12 +10,12 @@ The multicast reaction provides a reaction that many other reactions can `subscr
 
 It also helps manage actions: if a `multicast` reaction is passed to another `action`, the first `action` will automatically `stop`.
 
+<TOC />
+
 ## Import
 
 ```javascript
 import { multicast } from 'popmotion';
-// or stand-alone:
-import multicast from 'popmotion/reactions';
 ```
 
 ## Usage

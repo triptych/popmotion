@@ -8,12 +8,12 @@ category: compositors
 
 Control a named map of actions, and output to the same structure.
 
+<TOC />
+
 ## Import
 
 ```javascript
 import { composite } from 'popmotion';
-// or stand-alone:
-import composite from 'popmotion/compositors/composite';
 ```
 
 ## Usage

@@ -8,12 +8,12 @@ category: compositors
 
 Chain a sequence of actions, move to the next when the current one completes.
 
+<TOC />
+
 ## Import
 
 ```javascript
 import { chain } from 'popmotion';
-// or stand-alone:
-import chain from 'popmotion/compositors/chain';
 ```
 
 ## Usage

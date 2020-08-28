@@ -8,12 +8,12 @@ category: input
 
 `listen` creates DOM event listeners as an action stream.
 
+<TOC />
+
 ## Import
 
 ```javascript
 import { listen } from 'popmotion';
-// or stand-alone:
-import listen from 'popmotion/input/listen';
 ```
 
 ## Usage

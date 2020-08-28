@@ -8,12 +8,12 @@ category: compositors
 
 Fade between two numerical actions.
 
+<TOC />
+
 ## Import
 
 ```javascript
 import { crossfade } from 'popmotion';
-// or stand-alone:
-import crossfade from 'popmotion/compositors/crossfade';
 ```
 
 ## Usage

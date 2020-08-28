@@ -4,6 +4,8 @@ description: Create posed components
 category: react-native
 ---
 
+> React Native Pose has been **deprecated**. If you are interested in a version of [Framer Motion](https://framer.com/motion) for React Native, let us know on the [GitHub ticket](https://github.com/framer/motion/issues/180).
+
 # `posed`
 
 React Native Pose exports a single function, `posed`.
@@ -11,6 +13,8 @@ React Native Pose exports a single function, `posed`.
 ```javascript
 import posed from 'react-native-pose';
 ```
+
+<TOC />
 
 ## Posed components
 
@@ -68,11 +72,21 @@ export default ({ isOpen }) => (
 
 ## Props
 
-### `pose?: string | string[]`
+### pose
+
+`pose?: string | string[]`
 
 The name of one or more poses to set to.
 
-### `poseKey?: string | number`
+### initialPose
+
+`initialPose?: string | string[]`
+
+The name of one or more poses to set to before the component mounts. Once the component mounts, it will transition from this pose into `pose`.
+
+### poseKey
+
+`poseKey?: string | number`
 
 If `poseKey` changes, it'll force the posed component to transition to the current `pose`, even if it hasn't changed.
 
@@ -88,14 +102,20 @@ const Slider = posed.View({
 ({ target }) => <Slider pose="nextItem" poseKey={target} target={target} />
 ```
 
-### `onDragStart/onDragEnd?: (e: NativeEvent, gestureState: GestureState) => any`
+### onDragStart/onDragEnd
+
+`onDragStart/onDragEnd?: (e: NativeEvent, gestureState: GestureState) => any`
 
 Lifecycle callbacks for drag events. Provided the same arguments as [PanResponder's lifecycle events](https://facebook.github.io/react-native/docs/panresponder.html).
 
-### `withParent?: boolean = true`
+### withParent
+
+`withParent?: boolean = true`
 
 If explicitly set to `false`, this posed component will become a new root for any posed children components.
 
-### `values?: { [key: string]: Animated.Value }`
+### values
+
+`values?: { [key: string]: Animated.Value }`
 
 Optional way of providing the posed component the `Animated.Value`s rather than letting it create them itself. In case you want to retain ownership for whatever reason.

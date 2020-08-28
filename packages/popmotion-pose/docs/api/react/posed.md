@@ -1,18 +1,16 @@
 ---
-title: Posed component
+title: Posed
 description: Create a posed component
 category: react
 ---
 
-# `posed`
+> React Pose has been **deprecated** in favour of [Framer Motion](https://framer.com/motion). [Read the upgrade guide](https://www.framer.com/api/motion/migrate-from-pose/)
+
+# posed
 
 `posed` is used to create animated and interactive components that you can reuse throughout your React site.
 
-## Install
-
-```bash
-npm install react-pose --save
-```
+<TOC />
 
 ## Import
 
@@ -31,7 +29,7 @@ import posed from 'react-pose'
 
 #### HTML & SVG elements
 
-`pose` isn't called directly, instead we pass [posed props](/pose/api/props) to `posed.div`, `posed.button` etc. Every HTML and SVG element is supported:
+`pose` isn't called directly, instead we pass [a pose config object](/pose/api/react-config) to `posed.div`, `posed.button` etc. Every HTML and SVG element is supported:
 
 ```javascript
 const DraggableCircle = posed.circle({
@@ -50,22 +48,28 @@ Existing components can be converted to posed components by calling `posed` dire
 const PosedComponent = posed(MyComponent)(poseProps)
 ```
 
-For performance and layout calculations, React Pose requires a reference to the underlying DOM element. So, the component to be posed **must pass hostRef to the host element's ref prop**.
+For performance and layout calculations, React Pose requires a reference to the underlying DOM element. So, the component to be animated **must pass forward a ref using the `React.forwardRef` function**:
 
 ```javascript
-const MyComponent = ({ hostRef }) => <div ref={hostRef} />
+const MyComponent = forwardRef((props, ref) => (
+  <div ref={ref} {...props} />
+));
 
 const PosedComponent = posed(MyComponent)({
   draggable: true
-})
+});
 
 export default () => <PosedComponent pose={isOpen ? 'open' : 'closed'} />
 ```
 
-For FLIP support in a `PoseGroup`, it **optionally** needs to pass on the `style` prop:
+Many CSS-in-JS libraries like Styled Components will automatically do this for you.
+
+For FLIP support in a `PoseGroup` component, it **optionally** needs to pass on the `style` prop:
 
 ```javascript
-const MyComponent = ({ hostRef, style }) => <div ref={hostRef} style={style} />
+const MyComponent = forwardRef(({ style }, ref) => (
+  <div ref={ref} style={style} />
+));
 ```
 
 ### Set a pose
@@ -132,7 +136,7 @@ const sidebarProps = {
 const Sidebar = styled(posed.nav(sidebarProps))`
 ```
 
-#### `className`
+#### className
 
 ```javascript
 () => <Sidebar pose="closed" className="my-class" />
@@ -140,34 +144,103 @@ const Sidebar = styled(posed.nav(sidebarProps))`
 
 ## Props
 
-### `pose?: string | string[]`
+### pose
+
+`pose?: string | string[]`
 
 The name or names of the current pose.
 
-### `withParent?: boolean = true`
+### initialPose
+
+`initialPose?: string | string[]`
+
+The name of one or more poses to set to before the component mounts. Once the component mounts, it will transition from this pose into `pose`.
+
+### poseKey
+
+`poseKey?: string | number`
+
+If `poseKey` changes, it'll force the posed component to transition to the current `pose`, even if it hasn't changed.
+
+This won't be required for the majority of use-cases. But we might have something like a paginated where we pass the x offset to the component but the pose itself doesn't change:
+
+```javascript
+const Slider = posed.div({
+  nextItem: {
+    x: ({ target }) => target
+  }
+})
+
+({ target }) => <Slider pose="nextItem" poseKey={target} target={target} />
+```
+
+### withParent
+
+`withParent?: boolean = true`
 
 If set to `false`, this component won't subscribe to its parent posed component and create root for any further child components.
 
-### `onPoseComplete?: Function`
+### onPoseComplete
+
+`onPoseComplete?: Function`
 
 A callback that fires whenever a pose has finished transitioning.
 
-### `onChange?: { [key: string]: any }`
+### onValueChange
 
-**Deprecated:** See `onValueChange`
-
-### `onValueChange?: { [key: string]: any }`
+`onValueChange?: { [key: string]: any }`
 
 `onValueChange` is a map of functions, each corresponding to a value being animated by the posed component and will fire when that value changes.
 
-### `onDragStart`/`onDragEnd: (e: Event) => void`
+### onDragStart/onDragEnd
+
+`onDragStart/onDragEnd: (e: Event) => void`
 
 Callbacks that fire when dragging starts or ends. **Note:** These props are immutable and can't be changed after mounting.
 
-### `innerRef?: (ref: Element) => void`
+### onPressStart/onPressEnd
 
-An optional function that will call with the posed DOM element when it mounts, and `null` when it unmounts.
+`onPressStart/onPressEnd: (e: Event) => void`
 
-### `...props: { [key: string]: any }`
+Callbacks that fire when pressing starts or ends. **Note:** These props are immutable and can't be changed after mounting.
 
-Remaining props will be provided to a pose's `transition` function when that pose is entered.
+### ref
+
+`ref?: RefObject | (ref: Element) => void`
+
+An optional ref property. If a function, will call with the posed DOM element when it mounts, and `null` when it unmounts.
+
+Alternatively, it can be passed a ref object (created from `React.createRef`).
+
+### values/parentValues
+
+`values?: { [key: string]: Value }`
+
+Normally, Pose generates [Popmotion `value`](/api/value) for each animating property. It then passes these down to any posed children so `passive` values can link to them.
+
+Novel hierarchies, where the posed tree and the React component tree diverge, can be achieved by creating your own values map, and passing that to a single posed component.
+
+This same map can then be passed to multiple other posed component's `parentValues` property in order to establish a parent-children relationship even between sibling components.
+
+<CodePen id="xWrbNm" />
+
+### ...props
+
+`...props: { [key: string]: any }`
+
+When a new pose is entered, any remaining props set on a component will be used to resolve that pose's dynamic props:
+
+```javascript
+const Component = posed.div({
+  visible: { opacity: 1, y: 0 },
+  hidden: {
+    opacity: 0,
+    y: ({ i }) => i * 50
+  }
+})
+
+// Later
+({ isVisibile, i }) => (
+  <Component pose={isVisible ? 'visible' : 'hidden'} i={i} />
+)
+```

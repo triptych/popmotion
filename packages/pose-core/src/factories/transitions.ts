@@ -1,8 +1,16 @@
-import { PoseMap, Pose, TransitionFactory } from '../types';
+import { PoseMap, Pose, TransitionMapFactory, TransitionMap } from '../types';
+import { invariant } from 'hey-listen';
 
-type DefaultTransitions<A> = Map<string, TransitionFactory<A>>;
+type DefaultTransitions<A, TD> = Map<
+  string,
+  TransitionMap<A, TD> | TransitionMapFactory<A, TD>
+>;
 
-const applyDefaultTransition = <A>(pose: Pose<A>, key: string, defaultTransitions: DefaultTransitions<A>): Pose<A> => {
+const applyDefaultTransition = <A, TD>(
+  pose: Pose<A, TD>,
+  key: string,
+  defaultTransitions: DefaultTransitions<A, TD>
+): Pose<A, TD> => {
   return {
     ...pose,
     transition: defaultTransitions.has(key)
@@ -11,15 +19,25 @@ const applyDefaultTransition = <A>(pose: Pose<A>, key: string, defaultTransition
   };
 };
 
-const generateTransitions = <A>(poses: PoseMap<A>, defaultTransitions: DefaultTransitions<A>): PoseMap<A> => {
+const generateTransitions = <A, TD>(
+  poses: PoseMap<A, TD>,
+  defaultTransitions: DefaultTransitions<A, TD>
+): PoseMap<A, TD> => {
   Object.keys(poses).forEach(key => {
     const pose = poses[key];
-    poses[key] = pose.transition
-      ? pose
-      : applyDefaultTransition<A>(pose, key, defaultTransitions)
+
+    invariant(
+      typeof pose === 'object',
+      `Pose '${key}' is of invalid type. All poses should be objects.`
+    );
+
+    poses[key] =
+      pose.transition !== undefined
+        ? pose
+        : applyDefaultTransition<A, TD>(pose, key, defaultTransitions);
   });
 
   return poses;
-}
+};
 
 export default generateTransitions;

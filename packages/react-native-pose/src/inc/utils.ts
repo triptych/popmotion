@@ -1,7 +1,22 @@
-import { Animated, PanResponder, GestureResponderHandlers } from 'react-native';
-import { PoseComponentProps } from '../types';
-import { AnimatedPoser } from 'animated-pose/lib/types';
+import { AnimatedPoser } from 'animated-pose';
 
+type TransformList = Array<{ [key: string]: any }>;
+
+type StyleMap = {
+  transform?: TransformList;
+  [key: string]: any;
+};
+
+/**
+ * Order in which to apply transforms via the `transform` property.
+ * This is based off the CSS Transforms Level 2 proposal:
+ * https://drafts.csswg.org/css-transforms-2/#individual-transforms
+ *
+ * This is to remove the manual order definition, though this can still
+ * be achieved by defining an empty component `posed()(config)`, which will
+ * (using the children-as-function pattern) pass the generated Animated.Values
+ * for the user to consume arbitrarily.
+ */
 const defaultTransformOrder = [
   'x',
   'y',
@@ -20,26 +35,28 @@ const defaultTransformOrder = [
   'perspective'
 ];
 
+/**
+ * Allow the use of x/y/z as shorthand for `translate` properties.
+ */
 const aliasMap: { [key: string]: string } = {
   x: 'translateX',
   y: 'translateY',
   z: 'translateZ'
 };
 
-type TransformList = Array<{ [key: string]: any }>;
-
-type StyleMap = {
-  transform?: TransformList;
-  [key: string]: any;
-};
-
+/**
+ * Accepts a poser, and returns an animated React Native style object.
+ */
 export const getStylesFromPoser = (poser: AnimatedPoser) => {
   const values = poser.get();
   let hasTransform = false;
   const styles = Object.keys(values).reduce(
     (acc, key) => {
+      // If this isn't a transform property, add to the style map
       if (defaultTransformOrder.indexOf(key) === -1) {
         acc[key] = values[key];
+
+        // If it is a transform property, flag so we can deal with it separately
       } else {
         hasTransform = true;
       }
@@ -48,6 +65,7 @@ export const getStylesFromPoser = (poser: AnimatedPoser) => {
     {} as StyleMap
   );
 
+  // If we have a transform value, we need to create a transform property.
   if (hasTransform) {
     styles.transform = defaultTransformOrder.reduce(
       (acc, key) => {
@@ -56,64 +74,9 @@ export const getStylesFromPoser = (poser: AnimatedPoser) => {
         }
         return acc;
       },
-      [{ perspective: 1000 }] as TransformList
+      [] as TransformList
     );
   }
 
   return styles;
-};
-
-export const filterProps = ({
-  registerAsChild,
-  onUnmount,
-  Component,
-  pose,
-  poseKey,
-  draggable,
-  onDragStart,
-  onDragEnd,
-  ...props
-}: PoseComponentProps): PoseComponentProps => props;
-
-export const makeDraggable = (
-  poser: AnimatedPoser,
-  { draggable, onDragStart, onDragEnd }: PoseComponentProps
-): GestureResponderHandlers => {
-  const values = poser.get();
-  const dragX = draggable === true || draggable === 'x';
-  const dragY = draggable === true || draggable === 'y';
-
-  const panResponder = PanResponder.create({
-    onMoveShouldSetPanResponderCapture: () => true,
-    onPanResponderMove: Animated.event([
-      null,
-      {
-        dx: dragX ? values.x : null,
-        dy: dragY ? values.y : null
-      }
-    ]),
-    onPanResponderGrant: (e, gestureState) => {
-      if (dragX) {
-        values.x.setOffset(values.x._value);
-        values.x.setValue(0);
-      }
-
-      if (dragY) {
-        values.y.setOffset(values.y._value);
-        values.y.setValue(0);
-      }
-
-      if (onDragStart) onDragStart(e, gestureState);
-      poser.set('dragging', { gestureState });
-    },
-    onPanResponderRelease: (e, gestureState) => {
-      if (onDragEnd) onDragEnd(e, gestureState);
-      if (dragX) values.x.flattenOffset();
-      if (dragY) values.y.flattenOffset();
-      if (onDragEnd) onDragEnd(e, gestureState);
-      poser.set('dragEnd', { gestureState });
-    }
-  });
-
-  return panResponder.panHandlers;
 };

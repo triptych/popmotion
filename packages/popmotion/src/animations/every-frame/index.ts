@@ -1,21 +1,22 @@
-import { currentTime, currentFrameTime, onFrameUpdate } from 'framesync';
+import sync, { cancelSync } from 'framesync';
 import action, { Action } from '../../action';
 
-const frame = (): Action => action(({ update }) => {
-  let isActive = true;
-  const startTime = currentTime();
+const frame = (): Action =>
+  action(({ update }) => {
+    let initialTime = 0;
 
-  const nextFrame = () => {
-    if (!isActive) return;
-    update(Math.max(currentFrameTime() - startTime, 0));
-    onFrameUpdate(nextFrame);
-  };
+    const process = sync.update(
+      ({ timestamp }) => {
+        if (!initialTime) initialTime = timestamp;
+        update(timestamp - initialTime);
+      },
+      true,
+      true
+    );
 
-  onFrameUpdate(nextFrame);
-
-  return {
-    stop: () => isActive = false
-  };
-});
+    return {
+      stop: () => cancelSync.update(process)
+    };
+  });
 
 export default frame;

@@ -14,8 +14,10 @@ export type Value = {
 
 export type Action = Animated.CompositeAnimation;
 
-export interface AnimatedPoser extends Poser<Value, Action, AnimatedPoser> {
-  addChild: (config: PoserConfig<Value>) => AnimatedPoser;
+export interface AnimatedPoser
+  extends Poser<Value, Action, Action, AnimatedPoser> {
+  addChild: (config: AnimatedPoseConfig) => AnimatedPoser;
+  flip: (prev: Layout, next: Layout) => void;
 }
 
 export type TransitionProps = {
@@ -26,11 +28,12 @@ export type TransitionProps = {
 
 export type Transition = (
   { value, toValue }: TransitionProps
-) => Animated.CompositeAnimation;
+) => false | Animated.CompositeAnimation;
 
 export type CreateValueProps = {
   passiveParent?: Value;
   passiveProps?: Interpolation;
+  passiveParentKey?: string;
 };
 
 export type AnimatedPoseConfig = PoserConfig<Value>;
@@ -42,7 +45,7 @@ export type AnimatedFactoryConfig = {
 
 export type AnimatedPoserFactory = (
   config: AnimatedPoseConfig
-) => Poser<Value, Action, AnimatedPoser>;
+) => Poser<Value, Action, Action, AnimatedPoser>;
 
 export type UnitConverter = (v: number) => number;
 
@@ -52,3 +55,10 @@ export type DimensionConverterFactory = (
 ) => UnitConverter;
 
 export type UnitConverterMap = { [key: string]: UnitConverter };
+
+export type Layout = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};

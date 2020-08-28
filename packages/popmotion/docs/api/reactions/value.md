@@ -8,12 +8,12 @@ category: reactions
 
 A [multicast reaction](/api/multicast) that tracks the state of a number and allows velocity queries.
 
+<TOC />
+
 ## Import
 
 ```javascript
 import { value } from 'popmotion';
-// or stand-alone:
-import value from 'popmotion/reactions/value';
 ```
 
 ## Usage

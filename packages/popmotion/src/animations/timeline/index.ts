@@ -1,10 +1,15 @@
 import { Action } from '../../action';
-import { AnimationDefinition, Instruction, Tracks, TrackActions } from './types';
+import {
+  AnimationDefinition,
+  Instruction,
+  Tracks,
+  TrackActions
+} from './types';
 import keyframes from '../keyframes';
-import { KeyframeProps } from '../keyframes/types';
-import { easeInOut, linear } from '../../easing';
+import { KeyframesProps } from '../keyframes/types';
+import { easeInOut, linear } from '@popmotion/easing';
 import composite from '../../compositors/composite';
-import { TweenProps } from '../tween/types';
+import { TweenProps, TweenInterface } from '../tween/types';
 import { Value } from '../../reactions/value';
 
 const DEFAULT_DURATION = 300;
@@ -23,16 +28,20 @@ const flattenTimings = (instructions: Instruction[]) => {
     flatInstructions.push(item);
 
     if (i !== numSegments - 1) {
-      const duration = (item as AnimationDefinition).duration || DEFAULT_DURATION;
-      offset += staggerDelay as number;
-      flatInstructions.push(`-${duration - offset}`);
+      const duration =
+        (item as AnimationDefinition).duration || DEFAULT_DURATION;
+      offset = staggerDelay as number;
+      flatInstructions.push(`${offset - duration}`);
     }
   });
 
   return flatInstructions;
 };
 
-const flattenArrayInstructions = (instructions: Instruction[], instruction: Instruction) => {
+const flattenArrayInstructions = (
+  instructions: Instruction[],
+  instruction: Instruction
+) => {
   Array.isArray(instruction)
     ? instructions.push(...flattenTimings(instruction))
     : instructions.push(instruction);
@@ -40,7 +49,11 @@ const flattenArrayInstructions = (instructions: Instruction[], instruction: Inst
   return instructions;
 };
 
-const convertDefToProps = (props: KeyframeProps, def: AnimationDefinition, i: number) => {
+const convertDefToProps = (
+  props: KeyframesProps,
+  def: AnimationDefinition,
+  i: number
+) => {
   const { duration, easings, times, values } = props;
   const numValues = values.length;
   const prevTimeTo = times[numValues - 1];
@@ -51,7 +64,6 @@ const convertDefToProps = (props: KeyframeProps, def: AnimationDefinition, i: nu
   if (i === 0) {
     (values as Value[]).push(def.from);
     times.push(timeFrom);
-
   } else {
     // If we need to patch an interim tween
     if (prevTimeTo !== timeFrom) {
@@ -65,7 +77,6 @@ const convertDefToProps = (props: KeyframeProps, def: AnimationDefinition, i: nu
       (values as Value[]).push(from);
       times.push(timeFrom);
       easings.push(linear);
-
     } else if (def.from !== undefined) {
       (values as Value[]).push(def.from);
       times.push(timeFrom);
@@ -82,10 +93,10 @@ const convertDefToProps = (props: KeyframeProps, def: AnimationDefinition, i: nu
 };
 
 // TODO replace most of these steps with reduce when TS bug is fixed
-const timeline = (
+const timeline = <V = any>(
   instructions: Instruction[],
   { duration, elapsed, ease, loop, flip, yoyo }: TweenProps = {}
-): Action => {
+): Action<TweenInterface<V>> => {
   let playhead = 0;
   let calculatedDuration = 0;
 
@@ -97,19 +108,20 @@ const timeline = (
     if (typeof instruction === 'string') {
       playhead += parseFloat(instruction);
 
-    // If absolute timestamp
+      // If absolute timestamp
     } else if (typeof instruction === 'number') {
       playhead = instruction;
 
-    // If animation definition, apply playhead
+      // If animation definition, apply playhead
     } else {
       const def: AnimationDefinition = {
-        ...instruction as AnimationDefinition,
+        ...(instruction as AnimationDefinition),
         at: playhead
       };
 
       // TODO: Apply defaults in a cleaner fashion
-      def.duration = def.duration === undefined ? DEFAULT_DURATION : def.duration;
+      def.duration =
+        def.duration === undefined ? DEFAULT_DURATION : def.duration;
 
       animationDefs.push(def);
       playhead += def.duration;
@@ -156,7 +168,7 @@ const timeline = (
     }
   }
 
-  return composite(trackKeyframes);
+  return composite(trackKeyframes) as any;
 };
 
 export default timeline;

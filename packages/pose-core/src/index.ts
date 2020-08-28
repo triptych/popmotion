@@ -1,66 +1,90 @@
 import {
   PoseFactoryConfig,
   PoserConfig,
+  Pose,
+  ExtendAPI,
+  TransformPose,
+  ReadValueFromSource,
   Poser,
   ActiveActions,
   ActivePoses,
   ChildPosers,
   PoseMap,
-  PoserState
+  PoserState,
+  TransitionMap
 } from './types';
 
 import createPoseSetter from './factories/setter';
-import createValueMap from './factories/values';
+import createValueMap, { DEFAULT_INITIAL_POSE } from './factories/values';
 import generateDefaultTransitions from './factories/transitions';
-import { eachValue, fromPose } from './inc/transition-composers';
 import { selectPoses, selectAllValues } from './inc/selectors';
+import { sortByReversePriority } from './inc/utils';
 
-const poseFactory = <V, A, P>({
+const poseFactory = <V, A, C, P, TD>({
   getDefaultProps,
   defaultTransitions,
   bindOnChange,
   startAction,
   stopAction,
   readValue,
+  readValueFromSource,
   resolveTarget,
+  setValue,
+  setValueNative,
   createValue,
+  convertValue,
   getInstantTransition,
   getTransitionProps,
   addActionDelay,
   selectValueToRead,
+  convertTransitionDefinition,
+  transformPose,
+  posePriority,
+  forceRender,
   extendAPI
-}: PoseFactoryConfig<V, A, P>) => (config: PoserConfig<V>): Poser<V, A, P> => {
+}: PoseFactoryConfig<V, A, C, P, TD>) => (
+  config: PoserConfig<V>
+): Poser<V, A, C, P> => {
   // If set, add parent values to ancestor chain
-  const { parentValues, ancestorValues } = config;
+  const { parentValues, ancestorValues = [] } = config;
   if (parentValues) ancestorValues.unshift({ values: parentValues });
 
-  const activeActions: ActiveActions<A> = new Map();
+  const activeActions: ActiveActions<C> = new Map();
   const activePoses: ActivePoses = new Map();
-  const children: ChildPosers<V, A, P> = new Set();
+  const children: ChildPosers<V, A, C, P> = new Set();
 
-  const poses = generateDefaultTransitions<A>(
+  const poses = generateDefaultTransitions<A, TD>(
     selectPoses(config),
     defaultTransitions
   );
 
   // Initialise props
-  let props = config.props || {};
-  if (getDefaultProps) props = { ...props, ...getDefaultProps(config) };
+  let { props = {} } = config;
+  if (getDefaultProps) props = { ...getDefaultProps(config), ...props };
 
   // Create values map
-  const { passive, values: userSetValues, initialPose } = config;
-  const values = createValueMap<V, A>({
+  const {
+    passive,
+    values: userSetValues,
+    initialPose = DEFAULT_INITIAL_POSE
+  } = config;
+
+  const values = createValueMap<V, A, TD>({
     poses,
     passive,
     ancestorValues,
     readValue,
+    setValueNative,
     createValue,
+    convertValue,
+    readValueFromSource,
     userSetValues,
     initialPose,
+    activePoses,
     props
   });
 
-  const state: PoserState<V, A, P> = {
+  const state: PoserState<V, A, C, P> = {
     activeActions,
     activePoses,
     children,
@@ -78,22 +102,57 @@ const poseFactory = <V, A, P>({
     poses,
     getInstantTransition,
     getTransitionProps,
+    convertTransitionDefinition,
+    setValue,
+    setValueNative,
     startAction,
     stopAction,
     resolveTarget,
-    addActionDelay
+    addActionDelay,
+    transformPose,
+    posePriority,
+    forceRender
   });
 
-  const api: Poser<V, A, P> = {
+  const has = (poseName: string) => !!poses[poseName];
+
+  const api: Poser<V, A, C, P> = {
     set,
+    unset: (poseName, poseProps) => {
+      const posesToSet: string[] = [];
+
+      activePoses.forEach(valuePoses => {
+        const poseIndex = valuePoses.indexOf(poseName);
+
+        if (poseIndex === -1) return;
+        const currentPose = valuePoses[0];
+
+        // Remove pose from activePoses list
+        valuePoses.splice(poseIndex, 1);
+        const nextPose = valuePoses[0];
+
+        if (nextPose === currentPose) return;
+        if (posesToSet.indexOf(nextPose) === -1) {
+          posesToSet.push(nextPose);
+        }
+      });
+
+      const animationsToResolve = posesToSet
+        .sort(sortByReversePriority(posePriority))
+        .map(poseToSet => set(poseToSet, poseProps, false));
+
+      children.forEach(child =>
+        animationsToResolve.push(child.unset(poseName))
+      );
+
+      return Promise.all(animationsToResolve);
+    },
     get: valueName =>
       valueName
         ? selectValueToRead(values.get(valueName))
         : selectAllValues(values, selectValueToRead),
-    has: poseName => !!poses[poseName],
-    setProps: newProps => {
-      props = { ...props, ...newProps };
-    },
+    has,
+    setProps: newProps => (state.props = { ...state.props, ...newProps }),
 
     // Child methods
     _addChild: (childConfig, factory) => {
@@ -120,8 +179,19 @@ const poseFactory = <V, A, P>({
     }
   };
 
-  return extendAPI(api, state);
+  return extendAPI(api, state, config);
 };
 
 export default poseFactory;
-export { Poser, PoserConfig, PoseMap, eachValue, fromPose };
+export {
+  Poser,
+  PoserConfig,
+  TransitionMap,
+  ActiveActions,
+  Pose,
+  PoseMap,
+  PoserState,
+  ExtendAPI,
+  TransformPose,
+  ReadValueFromSource
+};

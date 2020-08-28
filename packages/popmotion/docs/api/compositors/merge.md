@@ -8,12 +8,12 @@ category: compositors
 
 Combine multiple actions into one output.
 
+<TOC />
+
 ## Import
 
 ```javascript
 import { merge } from 'popmotion';
-// or stand-alone:
-import merge from 'popmotion/compositors/merge';
 ```
 
 ## Usage

@@ -1,6 +1,281 @@
 # Changelog
 
-Pose adheres to [Semantic Versioning](http://semver.org/).
+Popmotion Pose adheres to [Semantic Versioning](http://semver.org/).
+
+## [3.4.11] 2019-11-15
+
+### Fixed
+
+- Fixed type definition output.
+
+## [3.4.9] 2019-11-14
+
+### Fixed
+
+- Fixed in Typescript 3.7.
+
+## [3.4.8] 2019-04-24
+
+### Fixed
+
+- Fatal error in Chrome < 36 as a result of undefined `transform` [#775](https://github.com/Popmotion/popmotion/pull/775)
+
+## [3.4.7] 2019-04-09
+
+### Fixed
+
+- Unset event end pose when setting event start pose [#762](https://github.com/Popmotion/popmotion/pull/762)
+
+## [3.4.6] 2019-01-02
+
+### Fixed
+
+- Fixed drag and applyOnEnd conflict [#708](https://github.com/Popmotion/popmotion/pull/708)
+
+## [3.4.5] 2019-01-02
+
+### Fixed
+
+- Prevent window scroll on drag [#706](https://github.com/Popmotion/popmotion/pull/706)
+
+## [3.4.4] 2019-01-02
+
+### Fixed
+
+- Fixed `applyOnStart` [#703](https://github.com/Popmotion/popmotion/pull/703)
+
+## [3.4.3] 2019-01-28
+
+### Updated
+
+- Tightened type definitions for TransitionMapFactory [#714](https://github.com/Popmotion/popmotion/pull/714)
+
+## [3.4.2] 2019-01-23
+
+### Fixed
+
+- Fix drag bounds with negative values [#701](https://github.com/Popmotion/popmotion/pull/701)
+
+## [3.4.1] 2018-12-17
+
+### Fixed
+
+- Allow click within draggable. [#541](https://github.com/Popmotion/popmotion/issues/541)
+
+## [3.4.0] 2018-11-01
+
+### Fixed
+
+- Prevent mutation of `applyOnEnd`. [#571](https://github.com/Popmotion/popmotion/pull/571)
+- Upgrading `popmotion@8.5.0`.
+
+## [3.3.2] 2018-10-19
+
+### Fixed
+
+- Ensuring `applyAtEnd` is correctly set if we're animating an element **and** it's defined in `applyAtEnd`.
+
+## [3.3.1] 2018-09-21
+
+### Updated
+
+- `popmotion@8.4.0`
+
+## [3.3.0] 2018-09-06
+
+### Added
+
+- Support for `applyAtStart` and `applyAtEnd` properties.
+
+## [3.2.7] 2018-09-06
+
+### Fixed
+
+- Fixed `position` never being resolved [#470](https://github.com/Popmotion/popmotion/pull/470)
+- Fixed `passive` values `.get()` returning the value they were linked to, not the value itself.
+
+## [3.2.6] 2018-09-06
+
+### Fixed
+
+- Exposing more types.
+
+## [3.2.5] 2018-08-05
+
+### Fixed
+
+- Added `position` support for FLIP transforms.
+
+## [3.2.4] 2018-09-03
+
+### Fixed
+
+- Dynamically set positional props. Thanks to [Klaasman](https://github.com/klaasman)
+
+## [3.2.3] 2018-09-01
+
+### Fixed
+
+- Flash of content in Safari. [#459](https://github.com/Popmotion/popmotion/issues/459)
+
+## [3.2.2] 2018-08-30
+
+### Fixed
+
+- Fixing `dragBounds` and `draggable` types. [#396](https://github.com/Popmotion/popmotion/issues/396)
+
+## [3.2.1] 2018-08-30
+
+### Fixed
+
+- Detecting `mouseup` outside window and stopping dragging/pressing accordingly.
+
+## [3.2.0] 2018-08-30
+
+### Added
+
+- `onPressStart`/`onPressEnd` callbacks.
+
+## [3.1.0] 2018-08-28
+
+### Added
+
+- Animate Between Anything. Animate x/y/width/height/top/left/bottom/right between any two value types, even `calc` and `'auto'`!
+
+## [3.0.1] 2018-08-20
+
+### Fixed
+
+- Restricting `preventDefault` only to drag events. 
+
+## [3.0.0] 2018-08-19
+
+### Added
+
+- Pointer events: `drag`, `press`, `hover`, `focus`.
+- Support for `init` pose.
+
+### Changed
+
+- Changing `dragging` for `drag`
+
+## [2.2.0] 2018-08-18
+
+### Added
+
+- `hoverable` config option.
+
+## [2.1.2] 2018-08-13
+
+### Fixed
+
+- Added missing `linear` easing.
+- Fixed `keyframes` animation type.
+
+## [2.1.1] 2018-07-27
+
+### Fixed
+
+- Bug where `dragBounds` were defined but no corresponding pose with an initial value for that `x`/`y` value was defined. `x`/`y` is now created with the same value type as its defined boundaries.
+
+## [2.1.0] 2018-07-01
+
+### Added
+
+- `popmotion@8.3.0` supports complex value types.
+
+## [2.0.6] 2018-06-15
+
+### Fixed
+
+- Removing `Map`, as its initialiser doesn't play nice with IE11.
+
+## [2.0.5] 2018-06-14
+
+### Fixed
+
+- `transition.delay` now working.
+
+## [2.0.4] 2018-06-14
+
+### Fixed
+
+- Forcing `popmotion@8.2.5`.
+
+## [2.0.3] 2018-06-08
+
+### Fixed
+
+- Fixing local `popmotion` resolution.
+
+## [2.0.2] 2018-06-08
+
+### Upgrade
+
+- `popmotion@8.2.4`
+- `pose-core@0.7.4`
+
+## [2.0.1] 2018-05-29
+
+### Changed
+
+Moved `popmotion` to `dependencies`.
+
+## [2.0.0] 2018-05-29
+
+### Added
+
+- `flip: true` required to opt-in to FLIP animations.
+- Fully serialised definitions for custom transitions.
+
+### Changed
+
+- Move `popmotion` from `dependencies` to `peerDependencies`.
+
+## [1.5.0] 2018-05-10
+
+### Updated
+
+- Moving to Rollup for distribution.
+
+## [1.4.4] 2018-05-10
+
+### Updated
+
+- `pose-core@1.5.2`
+
+## [1.4.3] 2018-05-10
+
+### Fixed
+
+- Stricter check during dragging for `percent` type.
+
+## [1.4.2] 2018-05-09
+
+### Fixed
+
+- Fixing some types.
+
+## [1.4.1] 2018-05-09
+
+### Fixed
+
+- Fixing some types.
+
+## [1.4.0] 2018-05-09
+
+### Changed
+
+- Migration to `pose-core`
+
+### Deprecated
+
+- `transformProps` -> `props`
+- `setTransitionProps` -> `setProps`
+
+### Fixed
+
+- Positional props on poses (like `width`/`top`) can now be set as functions.
 
 ## [1.2.0] 2018-04-10
 

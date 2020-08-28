@@ -1,13 +1,16 @@
 {
   "name": "popmotion",
-  "version": "8.1.22",
+  "version": "8.7.3",
   "description": "A functional, reactive motion library.",
   "author": "Matt Perry",
   "homepage": "https://popmotion.io",
-  "main": "./index.js",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "module": "dist/popmotion.es.js",
+  "jsnext:main": "dist/popmotion.es.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Popmotion/popmotion"
+    "url": "https://github.com/Popmotion/popmotion/tree/master/packages/popmotion"
   },
   "bugs": {
     "url": "https://github.com/Popmotion/popmotion/issues"
@@ -33,37 +36,51 @@
   "analyze": true,
   "license": "MIT",
   "scripts": {
-    "build":
-      "npm run test && tsc && tsc --outDir lib && NODE_ENV=production webpack && npm run measure",
-    "prepublish": "npm run build",
-    "postpublish": "npm run clean",
-    "watch": "NODE_ENV=development webpack --progress --colors --watch",
-    "measure": "gzip -c dist/popmotion.global.min.js | wc -c",
-    "test": "jest",
-    "publish-beta": "npm publish --tag beta",
-    "clean": "git clean -fd -e node_modules/ -e lib/ src/ -x ."
+    "build": "rollup -c && tsc --emitDeclarationOnly && npm run measure",
+    "postbuild": "babel $npm_package_module --out-file $npm_package_module --no-babelrc --plugins annotate-pure-calls",
+    "watch": "rollup -c -w",
+    "prepublishOnly": "npm run test && npm run build",
+    "measure": "gzip -c $npm_package_unpkg | wc -c",
+    "test": "jest --maxWorkers=2",
+    "publish-beta": "npm publish --tag beta"
   },
   "dependencies": {
-    "framesync": "^3.1.7",
-    "style-value-types": "^1.0.4",
-    "stylefire": "^1.2.9"
+    "@popmotion/easing": "^1.0.1",
+    "@popmotion/popcorn": "^0.4.4",
+    "framesync": "^4.0.0",
+    "hey-listen": "^1.0.5",
+    "style-value-types": "^3.1.7",
+    "stylefire": "^7.0.1",
+    "tslib": "^1.10.0"
   },
   "devDependencies": {
-    "jest": "^21.1.0",
+    "@types/jest": "^23.1.1",
+    "jest": "^23.1.0",
+    "jest-cli": "^23.1.0",
     "ts-jest": "^21.2.4",
-    "ts-list": "^1.0.5",
-    "ts-loader": "^3.5.0",
-    "tslint-circular-dependencies": "^0.1.0",
-    "typescript": "^2.7.2",
-    "webpack": "^3.0.0"
+    "tslint-circular-dependencies": "^0.1.0"
   },
   "jest": {
-    "moduleFileExtensions": ["ts", "js"],
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "moduleNameMapper": {
+      "@popmotion/easing": "<rootDir>/../../easing/src",
+      "@popmotion/popcorn": "<rootDir>/../../popcorn/src",
+      "stylefire": "<rootDir>/../../stylefire/src",
+      "style-value-types": "<rootDir>/../../style-value-types/src",
+      "framesync": "<rootDir>/../../framesync/src"
+    },
     "transform": {
-      "\\.(ts)$": "../node_modules/ts-jest/preprocessor.js"
+      "\\.(ts)$": "../../../node_modules/ts-jest/preprocessor.js"
     },
     "testRegex": "/_tests/.*\\.(ts|js)$",
     "rootDir": "src"
   },
-  "unpkg": "./dist/popmotion.global.js"
+  "unpkg": "./dist/popmotion.global.min.js",
+  "prettier": {
+    "parser": "typescript",
+    "singleQuote": true
+  }
 }

@@ -8,12 +8,12 @@ category: compositors
 
 Fires `complete` after the defined interval.
 
+<TOC />
+
 ## Import
 
 ```javascript
 import { delay } from 'popmotion';
-// or stand-alone:
-import delay from 'popmotion/compositors/delay';
 ```
 
 ## Usage

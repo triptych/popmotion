@@ -1,9 +1,8 @@
 import tween from '../';
-import { currentFrameTime } from 'framesync';
 
 describe('tween', () => {
   it('should return a default tween', () => {
-    return new Promise((complete) => {
+    return new Promise(complete => {
       tween().start({ complete });
     });
   });
@@ -12,8 +11,8 @@ describe('tween', () => {
     return new Promise((resolve, reject) => {
       let i = 0;
       tween({ to: 300 }).start({
-        complete: () => i === 300 ? resolve() : reject(),
-        update: (v) => i = v
+        complete: () => (i === 300 ? resolve() : reject()),
+        update: v => (i = v)
       });
     });
   });
@@ -22,7 +21,7 @@ describe('tween', () => {
     return new Promise((resolve, reject) => {
       const a = tween().start({
         complete: () => {
-          (a.getElapsed() === 300) ? resolve() : reject();
+          a.getElapsed() === 300 ? resolve() : reject();
         }
       });
     });
@@ -36,7 +35,10 @@ describe('tween', () => {
           resolve();
         }
       });
-      const failTimeout = setTimeout(() => reject('timed out ' + a.getElapsed()), 520);
+      const failTimeout = setTimeout(
+        () => reject('timed out ' + a.getElapsed()),
+        520
+      );
       if (a.isActive() === false) reject('active false after start');
 
       setTimeout(() => {
@@ -102,18 +104,12 @@ describe('tween', () => {
     });
   });
 
-  it('shouldnt fire the same frame twice', () => {
+  it('should correctly animate complex values', () => {
+    let val = '';
     return new Promise((resolve, reject) => {
-      let lastTimestamp = 0;
-
-      tween({
-        to: { x: 100, y: 100 },
-      }).start({
-        complete: () => resolve(),
-        update: () => {
-          if (currentFrameTime() === lastTimestamp) reject();
-          lastTimestamp = currentFrameTime();
-        }
+      tween({ from: 'blur(0px)', to: 'blur(2px)' }).start({
+        update: v => (val = v),
+        complete: () => (val === 'blur(2px)' ? resolve() : reject(val))
       });
     });
   });

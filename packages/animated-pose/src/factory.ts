@@ -1,5 +1,6 @@
 import { Animated } from 'react-native';
 import poseFactory, { Poser, PoserConfig } from 'pose-core';
+import { warning } from 'hey-listen';
 import defaultTransitions from './inc/default-transitions';
 import { getUnit } from './inc/unit-conversion';
 import {
@@ -9,8 +10,14 @@ import {
   AnimatedPoser,
   AnimatedPoseConfig,
   AnimatedFactoryConfig,
-  AnimatedPoserFactory
+  AnimatedPoserFactory,
+  Layout
 } from './types';
+import convertTransitionDefinition, {
+  TransitionConfig
+} from './inc/convert-transition-definition';
+
+const FLIP_TO_ORIGIN = 'flipToOrigin';
 
 const nonLayoutValues = new Set([
   'x',
@@ -30,11 +37,20 @@ const nonLayoutValues = new Set([
   'opacity'
 ]);
 
+const isAction = (action: any): action is Action =>
+  typeof action.start !== 'undefined';
+
 export default ({
   convertUnitToPoints,
   unitConverters
 }: AnimatedFactoryConfig): AnimatedPoserFactory => {
-  const pose = poseFactory<Value, Action, AnimatedPoser>({
+  const pose: AnimatedPoserFactory = poseFactory<
+    Value,
+    Action,
+    Action,
+    AnimatedPoser,
+    TransitionConfig
+  >({
     /**
      * Bind onChange callbacks
      */
@@ -53,6 +69,23 @@ export default ({
      */
     readValue: () => 0,
 
+    readValueFromSource: (key: string) => {
+      if (key.includes('rotate')) return '0deg';
+      if (key.includes('scale')) return 1;
+      return 0;
+    },
+
+    /**
+     * Convert value
+     *
+     * If we get a user-defined Animated.Value we can convert that to the
+     * poser's `Value` type
+     */
+    convertValue: (raw, key) => ({
+      raw,
+      useNativeDriver: nonLayoutValues.has(key)
+    }),
+
     /**
      * Create value
      *
@@ -63,11 +96,20 @@ export default ({
     createValue: (
       init,
       key,
-      { passiveParent, passiveProps }: CreateValueProps = {}
+      props,
+      { passiveParent, passiveProps, passiveParentKey }: CreateValueProps = {}
     ) => {
       if (passiveParent) {
-        if (!nonLayoutValues.has(key)) passiveParent.useNativeDriver = false;
-        return { interpolation: passiveParent.raw.interpolate(passiveProps) };
+        if (!nonLayoutValues.has(key)) {
+          passiveParent.useNativeDriver = props.useNativeDriver = false;
+          warning(
+            false,
+            `useNativeDriver is invalidated on value "${passiveParentKey}", because interpolated value "${key}" can't be animated by the native driver.`
+          );
+        }
+        return {
+          interpolation: passiveParent.raw.interpolate(passiveProps)
+        };
       } else {
         let needsInterpolation = false;
         let unit = '';
@@ -105,11 +147,27 @@ export default ({
     /**
      * Get props to pass to a pose's `transition` method and dynamic props
      */
-    getTransitionProps: ({ raw, useNativeDriver }, toValue) => ({
+    getTransitionProps: ({ raw, useNativeDriver }, toValue, props) => ({
       value: raw,
-      useNativeDriver,
+      useNativeDriver:
+        props.useNativeDriver === false ? false : useNativeDriver,
       toValue
     }),
+
+    /**
+     * Convert transition definition
+     *
+     * If a transition has been defined as an object of props, convert this
+     * into an Animated animation
+     */
+    convertTransitionDefinition: ({ raw, useNativeDriver }, def, { toValue }) =>
+      isAction(def)
+        ? def
+        : convertTransitionDefinition(raw, {
+            ...def,
+            useNativeDriver,
+            toValue
+          }),
 
     /**
      * Resolve target as a number.
@@ -135,7 +193,7 @@ export default ({
     /**
      * Start the Animated animation
      */
-    startAction: (action, onComplete) => {
+    startAction: (value, action, onComplete) => {
       action.start(onComplete as Animated.EndCallback);
       return action;
     },
@@ -148,10 +206,11 @@ export default ({
     /**
      * Create a transition that instantly switches one value to another
      */
-    getInstantTransition: (value, toValue) =>
-      Animated.timing(value.raw, {
+    getInstantTransition: ({ raw, useNativeDriver }, { toValue }) =>
+      Animated.timing(raw, {
         toValue,
-        duration: 0
+        duration: 0,
+        useNativeDriver
       }),
 
     /**
@@ -166,21 +225,57 @@ export default ({
      */
     defaultTransitions,
 
+    setValue: ({ raw }, val) => raw.setValue(val),
+
+    // TODO: We could add a callback in props that fires setNativeProps
+    setValueNative: () => undefined,
+
+    transformPose: (enteringPose, name, { props }) => {
+      if (name === FLIP_TO_ORIGIN) {
+        const flipPose = { ...enteringPose };
+        if (props.xDelta) flipPose.x = 0;
+        if (props.yDelta) flipPose.y = 0;
+      }
+
+      return enteringPose;
+    },
+
     /**
      * Return the Poser API returned by the factory function, with extra methods
      * specific to Animated Pose
      */
-    extendAPI: api => {
-      return {
-        ...api,
-        addChild: (props: AnimatedPoseConfig) => {
-          return api._addChild(props, pose);
+    extendAPI: (api, { values }) => ({
+      ...api,
+      addChild: (config: AnimatedPoseConfig) => api._addChild(config, pose),
+      flip: ({ x: fromX, y: fromY }: Layout, { x: toX, y: toY }: Layout) => {
+        const xDelta = fromX - toX;
+        const yDelta = fromY - toY;
+        const hasMoved = xDelta || yDelta;
+
+        values.get('x').raw.setValue(xDelta);
+        values.get('y').raw.setValue(yDelta);
+
+        if (hasMoved) {
+          api.setProps({ xDelta, yDelta });
+          api.set(FLIP_TO_ORIGIN);
         }
-      };
-    }
+      }
+    })
   });
 
-  return pose;
+  const parseConfig = ({ flipEnabled, ...config }: PoserConfig<Value>) => {
+    if (flipEnabled) {
+      config[FLIP_TO_ORIGIN] = {
+        ...config[FLIP_TO_ORIGIN],
+        x: 0,
+        y: 0
+      };
+    }
+
+    return config;
+  };
+
+  return config => pose(parseConfig(config));
 };
 
 export { Poser, PoserConfig };

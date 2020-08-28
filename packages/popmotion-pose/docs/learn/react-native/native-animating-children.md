@@ -5,6 +5,8 @@ category: react-native
 next: native-dragging
 ---
 
+> React Native Pose has been **deprecated**. If you are interested in a version of [Framer Motion](https://framer.com/motion) for React Native, let us know on the [GitHub ticket](https://github.com/framer/motion/issues/180).
+
 # Animating children
 
 Traditionally, coordinating animations across multiple children has been a delicate, involved process.
@@ -21,9 +23,11 @@ export default ({items}) => (
 )
 ```
 
-<Video src="/static/videos/native-children.mp4" height="320" />
+<Video src="/videos/native-children.mp4" height="320" />
 
 Here's how it's done.
+
+<TOC />
 
 ## Child animation
 
@@ -72,7 +76,7 @@ If you have a posed component that's a child of another posed component, and you
 
 Currently, our child animations are being fired at the exact same time as the parent. We can change that with some props that can delay, stagger or rearrange animations.
 
-### `delay`
+### delay
 
 The `delay` property can be used to delay the animation on the current poser, without affecting the execution of child animations.
 
@@ -85,7 +89,7 @@ const Overlay = posed.View({
 });
 ```
 
-### `delayChildren`
+### delayChildren
 
 Conversely, the `delayChildren` property can be used to delay all the children animations.
 
@@ -98,7 +102,7 @@ const Overlay = posed.View({
 });
 ```
 
-### `staggerChildren`
+### staggerChildren
 
 Rather than animating all the children in at once, it's possible to stagger them in individually. The `staggerChildren` prop can be used to determine the delay between each one, starting from **after** the `delayChildren` duration:
 
@@ -113,10 +117,10 @@ const Overlay = posed.View({
 });
 ```
 
-### `staggerDirection`
+### staggerDirection
 
 `staggerDirection` can be used to determine which order we stagger over the children in. It can either be `1` (first to last, default), or `-1` (last to first).
 
-### `beforeChildren`/`afterChildren`
+### beforeChildren/afterChildren
 
 Setting either `beforeChildren` or `afterChildren` props to `true` will make the parent animation play **before** or **after** any children animations.

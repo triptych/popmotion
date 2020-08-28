@@ -1,5 +1,5 @@
+import { pipe } from '@popmotion/popcorn';
 import { Middleware, Update } from '../observer/types';
-import { pipe } from '../transformers';
 import { Predicate, Props } from './types';
 
 export default abstract class Chainable<T> {
@@ -14,27 +14,25 @@ export default abstract class Chainable<T> {
   applyMiddleware(middleware: Middleware): T {
     return this.create({
       ...this.props,
-      middleware: this.props.middleware ? [middleware, ...this.props.middleware] : [middleware]
+      middleware: this.props.middleware
+        ? [middleware, ...this.props.middleware]
+        : [middleware]
     });
   }
 
   pipe(...funcs: Update[]): T {
     const pipedUpdate = funcs.length === 1 ? funcs[0] : pipe(...funcs);
 
-    return this.applyMiddleware(
-      (update) => (v) => update(pipedUpdate(v))
-    );
+    return this.applyMiddleware(update => v => update(pipedUpdate(v)));
   }
 
   while(predicate: Predicate): T {
-    return this.applyMiddleware(
-      (update, complete) => (v) => predicate(v) ? update(v) : complete()
+    return this.applyMiddleware((update, complete) => v =>
+      predicate(v) ? update(v) : complete()
     );
   }
 
   filter(predicate: Predicate): T {
-    return this.applyMiddleware(
-      (update, complete) => (v) => predicate(v) && update(v)
-    );
+    return this.applyMiddleware(update => v => predicate(v) && update(v));
   }
 }

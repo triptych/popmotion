@@ -2,6 +2,241 @@
 
 Popmotion adheres to [Semantic Versioning](http://semver.org/).
 
+## [8.7.2] 2020-04-28
+
+### Fixed
+
+- Decay and inertia correctly start motion at from prop when using modifyTarget
+- Decay and inertia no longer round target calculation
+- Inertia calls modifyTarget even with zero-velocity
+
+### Changed
+
+- Inertia implementation refinements
+
+## [8.7.1] 2019-11-14
+
+### Upgrade
+
+- Upgraded to Typescript 3.7.
+
+## [8.7.0] 2019-06-25
+
+### Added
+
+- `repeatDelay` prop to `tween`.
+
+## [8.6.10] 2019-05-09
+
+### Fixed
+
+- Fixing undefined action creator. (https://github.com/Popmotion/popmotion/issues/794)[#794]
+
+## [8.6.9] 2019-05-01
+
+### Update
+
+- Dependencies.
+
+## [8.6.8] 2019-04-01
+
+### Update
+
+- `@popmotion/popcorn@0.3.6`
+
+## [8.6.7] 2019-04-01
+
+### Fixed
+
+- Making `inertia.complete` call conditional on there not being a subsequent animation. (https://github.com/Popmotion/popmotion/pull/763)[#763]
+
+## [8.6.6] 2019-04-01
+
+### Update
+
+- `@popmotion/popcorn@0.3.5`
+
+## [8.6.5] 2019-04-01
+
+### Update
+
+- Changing the behaviour of `inertia` to always spring back if the initial value is out of bounds. On multi-axis `inertia` animations it used to be possible that both values are out of bounds and only one was travelling towards its bound - this led to a situation where one animation used a spring and the other used decay.
+
+## [8.6.4] 2019-03-12
+
+### Upgrade
+
+- Upgrading `style-value-types@3.1.0`.
+
+## [8.6.3] 2019-02-21
+
+### Fixed
+
+- Correctly integrating remainder of `elapsed` in yoyo tweens to ensure multiple concurrent tweens stay in sync.
+
+## [8.6.2] 2019-01-28
+
+### Updated
+
+- Tightened type definitions for TransitionMapFactory [#714](https://github.com/Popmotion/popmotion/pull/714)
+
+## [8.6.1] 2019-01-23
+
+### Added
+
+- Adding `bounceStiffness`, `bounceDamping`, `restDelta`, `timeConstant` and `power` options to `inertia`.
+
+## [8.6.0] 2019-01-16
+
+### Added
+
+- `inertia` animation.
+
+## [8.5.5] 2018-12-28
+
+### Update
+
+- `stylefire@8.3.4`
+
+## [8.5.4] 2018-12-10
+
+### Fixed
+
+- When a subscriber is added, only that subscriber is fired with the latest value.
+
+## [8.5.3] 2018-11-20
+
+### Fixed
+
+- Ensuring `.stop()` is part of `ColdSubscription` definition.
+
+## [8.5.2] 2018-11-16
+
+### Upgrade
+
+- Moving to `popcorn@0.2.0`
+
+## [8.5.0] 2018-11-01
+
+### Fixed
+
+- Enforcing minor upgrade to Popcorn.
+
+## [8.4.2] 2018-11-01
+
+### Fixed
+
+- Migrating functions to Popcorn.
+
+## [8.4.1] 2018-09-29
+
+### Fixed
+
+- Calling `transform.steps()` should round properly to each step. [#528](https://github.com/Popmotion/popmotion/issues/528)
+
+## [8.4.0] 2018-09-21
+
+### Updated
+
+- Moved to `framesync@4.0.0`
+
+## [8.3.8] 2018-08-30
+
+### Fixed
+
+- Calling `tween.resume()` would speed the tween up by firing multiple timers. [#395](https://github.com/Popmotion/popmotion/issues/395)
+
+## [8.3.7] 2018-08-30
+
+### Fixed
+
+- Updating latest style-value-types and stylefire
+
+## [8.3.6] 2018-08-21
+
+### Fixed
+
+- Fixed `postinstall` script by removing Chalk.
+
+## [8.3.4] 2018-08-20
+
+### Fixed
+
+- Forcing `multitouch` to use `passive: true`.
+
+## [8.3.2] 2018-06-27
+
+### Fixed
+
+- Forced fix from `style-value-types@3.0.3`
+
+## [8.3.2] 2018-06-27
+
+### Fixed
+
+- Updated color regex in `style-value-types`
+
+## [8.3.1] 2018-06-27
+
+### Fixed
+
+- Fixing some TypeScript definition incompatibilities with newer versions of TS.
+
+## [8.3.0] 2018-06-20
+
+### Added
+
+- Support for animating value types:
+  - `px`
+  - `deg`
+  - `%`
+  - `vw`
+  - `vh`
+  - Complex types including:
+    - SVG paths
+    - CSS gradients
+    - CSS shadows
+
+## [8.2.5] 2018-06-13
+
+### Fixed
+
+- Removing `import`s from output declaration files.
+
+## [8.2.4] 2018-06-08
+
+### Added
+
+- Exporting popular types from index.ts.
+
+## [8.2.3] 2018-05-28
+
+### Fixed
+
+- Renaming `popmotion.min.js` back to `popmotion.global.min.js`
+
+## [8.2.1] 2018-05-17
+
+### Fixed
+
+- Removing `process.env.NODE_ENV` from bundled hey-listen
+
+## [8.2.0] 2018-05-17
+
+### Changed
+
+- Added Rollup to build process. Now just 11.1kb.
+
+### Deprecated
+
+- `css` and `svg` functions from `stylefire`. Use `styler` instead.
+
+## [8.1.23] 2018-05-10
+
+### Fixed
+
+* If an action stops more than once, `parallel` doesn't increase the stop counter.
+
 ## [8.1.22] 2018-03-23
 
 ### Fixed

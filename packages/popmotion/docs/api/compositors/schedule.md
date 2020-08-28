@@ -12,12 +12,12 @@ For instance, by default `pointer` outputs only when the pointer updates.
 
 With `schedule`, you could compose it with `everyFrame` to output the latest `pointer` value every frame.
 
+<TOC />
+
 ## Import
 
 ```javascript
 import { schedule } from 'popmotion';
-// or stand-alone:
-import schedule from 'popmotion/compositors/schedule';
 ```
 
 ## Usage
